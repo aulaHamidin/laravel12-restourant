@@ -17,11 +17,11 @@ class UserFactory extends Factory
     {
         return [
             'username' => $this->faker->unique()->userName(),
-            'password' => Hash::make(static::$password ?? 'password'), // Default password
             'fullname' => $this->faker->name(),
+            'password' => Hash::make(static::$password ?? 'password'), // Default password
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
-            'role_id' => fake()->numberBetween(1, 3), // Assuming roles with IDs 1 to 3 exist
+            'role_id' => fake()->numberBetween(17, 20), // Assuming roles with IDs 1 to 3 exist
         ];
     }
 

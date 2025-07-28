@@ -12,7 +12,7 @@ class ItemFactory extends Factory
             'item_name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
             'price' => $this->faker->numberBetween(1000, 100000),
-            'category_id' => \App\Models\Category::factory(),
+            'category_id' => $this->faker->numberBetween(13, 16),
             'image' => $this->faker->imageUrl(640, 480, 'food'),
             'is_active' => $this->faker->boolean(80), // 80% chance of being active
         ];
