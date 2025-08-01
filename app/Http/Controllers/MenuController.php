@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class MenuController extends Controller
 {
@@ -23,6 +27,11 @@ class MenuController extends Controller
         return view('customer.menu', compact('items'));
     }
 
+    /**
+     * Display the cart contents.
+     *
+     * @return \Illuminate\View\View
+     */
     public function cart()
     {
         $cart = Session::get('cart');
@@ -125,11 +134,114 @@ class MenuController extends Controller
         return redirect()->route('cart');
     }
 
+    /**
+     * Display the checkout page.
+     *
+     * @return \Illuminate\View\View
+     */
     public function checkout()
     {
-        $cart = Session::get('cart', []);
+        $cart = Session::get('cart');
+        if (empty($cart)) {
+            Session::flash('error', 'Keranjang Anda kosong. Silakan tambahkan item ke keranjang sebelum checkout.');
+            return redirect()->route('cart');
+        }
+        
+        // Retrieve the table number from the session
         $tableNumber = Session::get('table_number');
 
         return view('customer.checkout', compact('cart', 'tableNumber'));
+    }
+
+    public function storeCheckout(Request $request)
+    {
+        $cart = Session::get('cart');
+        if (empty($cart)) {
+            Session::flash('error', 'Keranjang Anda kosong. Silakan tambahkan item ke keranjang sebelum checkout.');
+            return redirect()->route('cart');
+        }
+
+        // Retrieve the table number from the session
+        $tableNumber = Session::get('table_number');
+
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'fullname' => 'required|string|max:255',
+            'phone' => 'required|string|max:15',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $total = 0;
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+
+        $totalAmount = 0;
+        foreach ($cart as $item) {
+            $totalAmount += $item['price'] * $item['quantity'];
+
+            $itemDetails[]= [
+                'id' => $item['id'],
+                'quantity' => $item['quantity'],
+                'price' => (int) ($item['price'] * 0.1 ) + $item['price'],
+                'name' => substr($item['name'], 0, 50),
+            ];
+        }
+
+        $user = User::firstOrCreate([
+            'fullname' => $request->input('fullname'),
+            'phone' => $request->input('phone'),
+            'role_id' => 20,
+        ]);
+        
+        $order = Order::create([
+            'order_code' => 'ORD-' .  $tableNumber . '-' . time(),
+            'user_id' => $user->id,
+            'subtotal' => $totalAmount,
+            'tax'       => 0.1 * $totalAmount,
+            'grand_total' => $totalAmount + (0.1 * $totalAmount),
+            'table_number' => $tableNumber,
+            'payment_method' => $request->payment_method,
+            'note' => $request->notes,
+            'status' => 'pending',
+        ]);
+
+        foreach ($cart as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'item_id' => $item['id'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'] * $item['quantity'],
+                'tax' => 0.1 * $item['price'] * $item['quantity'],
+                'total_price' => ($item['price'] * $item['quantity']) + (0.1 * $item['price'] * $item['quantity']),
+            ]); 
+        }
+        // Kosongkan keranjang setelah checkout
+        Session::forget('cart');
+        Session::flash('success', 'Checkout berhasil. Terima kasih telah berbelanja!');
+
+        return redirect()->route('checkout.success', ['orderId' => $order->order_code]) ;
+    }
+
+    public function checkoutSuccess($orderId)
+    {
+        $order = Order::where('order_code', $orderId)->first();
+        if (!$order) {
+            Session::flash('error', 'Pesanan tidak ditemukan.');
+            return redirect()->route('menu');
+        }
+
+        $orderItems = OrderItem::where('order_id', $order->id)->get();
+
+        if($order->patment_method == 'non_tunai') {
+            $order->status = 'settlement';
+            $order->save();
+        }
+        return view('customer.success', compact('order', 'orderItems'));
     }
 }
