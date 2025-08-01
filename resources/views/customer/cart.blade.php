@@ -1,6 +1,14 @@
 @extends('customer.layouts.master')
 
 @section('content')
+    <!-- Single Page Header start -->
+    <div class="container-fluid page-header py-5">
+        <h1 class="text-center text-white display-6">Keranjang</h1>
+        <ol class="breadcrumb justify-content-center mb-0">
+            <li class="breadcrumb-item active text-primary">Silakan periksa pesanan anda</li>
+        </ol>
+    </div>
+    <!-- Single Page Header End -->
     <div class="container-fluid py-5">
         <div class="container py-5">
             @if (session('success'))
@@ -11,7 +19,7 @@
             @endif
             @if (empty($cart))
                 <div class="d-flex justify-content-center align-items-center">
-                    Keranjang Anda kosong. Silakan tambahkan item ke keranjang!
+                    <h5 class="fw-bold">Keranjang Anda kosong. Silakan tambahkan item ke keranjang!</h5>
                 </div>
             @else
                 <div class="table-responsive">
@@ -49,7 +57,7 @@
                                         <p class="mb-0 mt-4">{{ $item['name'] ?? 'Menu' }}</p>
                                     </td>
                                     <td>
-                                        <p class="mb-0 mt-4">Rp{{ number_format($item['price'], 2, ',', '.') }}</p>
+                                        <p class="mb-0 mt-4">Rp {{ number_format($item['price'], 2, ',', '.') }}</p>
                                     </td>
                                     <td>
                                         <div class="input-group quantity mt-4" style="width: 100px;">
@@ -71,23 +79,27 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <p class="mb-0 mt-4">Rp{{ number_format($total, 2, ',', '.') }}</p>
+                                        <p class="mb-0 mt-4">Rp {{ number_format($total, 2, ',', '.') }}</p>
                                     </td>
                                     <td>
                                         <button class="btn btn-md rounded-circle bg-light border mt-4"
                                             onclick="if(confirm('Apakah Anda yakin ingin menghapus item ini?')) {
                                         event.preventDefault();
                                         removeItemFromCart({{ $item['id'] }});
-                                    }">
+                                        }">
                                             <i class="fa fa-times text-danger"></i>
                                         </button>
                                     </td>
-
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+
+                @php
+                    $tax = $subtotal * 0.1; // 10% tax
+                    $grandTotal = $subtotal + $tax;
+                @endphp
 
                 <div class="d-flex justify-content-end mb-4">
                     <a href="{{ route('cart.clear') }}" class="btn btn-danger text-uppercase"
@@ -107,13 +119,13 @@
                                 <div class="d-flex justify-content-between">
                                     <p class="mb-0 me-4">Pajak (10%)</p>
                                     <div class="">
-                                        <p class="mb-0">Rp{{ number_format($subtotal * 0.1, 2, ',', '.') }}</p>
+                                        <p class="mb-0">Rp{{ number_format($tax, 2, ',', '.') }}</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="py-4 mb-4 border-top d-flex justify-content-between">
                                 <h4 class="mb-0 ps-4 me-4">Total</h4>
-                                <h5 class="mb-0 pe-4">Rp{{ number_format($subtotal * 1.1, 2, ',', '.') }}</h5>
+                                <h5 class="mb-0 pe-4">Rp{{ number_format($grandTotal * 1.1, 2, ',', '.') }}</h5>
                             </div>
 
                         </div>
