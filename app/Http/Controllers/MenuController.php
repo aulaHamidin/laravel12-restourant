@@ -146,7 +146,7 @@ class MenuController extends Controller
             Session::flash('error', 'Keranjang Anda kosong. Silakan tambahkan item ke keranjang sebelum checkout.');
             return redirect()->route('cart');
         }
-        
+
         // Retrieve the table number from the session
         $tableNumber = Session::get('table_number');
 
@@ -185,10 +185,10 @@ class MenuController extends Controller
         foreach ($cart as $item) {
             $totalAmount += $item['price'] * $item['quantity'];
 
-            $itemDetails[]= [
+            $itemDetails[] = [
                 'id' => $item['id'],
                 'quantity' => $item['quantity'],
-                'price' => (int) ($item['price'] * 0.1 ) + $item['price'],
+                'price' => (int) ($item['price'] * 0.1) + $item['price'],
                 'name' => substr($item['name'], 0, 50),
             ];
         }
@@ -198,7 +198,7 @@ class MenuController extends Controller
             'phone' => $request->input('phone'),
             'role_id' => 20,
         ]);
-        
+
         $order = Order::create([
             'order_code' => 'ORD-' .  $tableNumber . '-' . time(),
             'user_id' => $user->id,
@@ -219,13 +219,50 @@ class MenuController extends Controller
                 'price' => $item['price'] * $item['quantity'],
                 'tax' => 0.1 * $item['price'] * $item['quantity'],
                 'total_price' => ($item['price'] * $item['quantity']) + (0.1 * $item['price'] * $item['quantity']),
-            ]); 
+            ]);
         }
         // Kosongkan keranjang setelah checkout
         Session::forget('cart');
         Session::flash('success', 'Checkout berhasil. Terima kasih telah berbelanja!');
 
-        return redirect()->route('checkout.success', ['orderId' => $order->order_code]) ;
+        if ($request->payment_method == 'tunai') {
+            return redirect()->route('checkout.success', ['orderId' => $order->order_code]);
+        } else {
+            // Redirect to Midtrans payment page
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$clientKey = config('midtrans.client_key');
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+            \Midtrans\Config::$isProduction = config('midtrans.is_production');
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $order->order_code,
+                    'gross_amount' => (int) $order->grand_total,
+                ],
+                'item_etails' => $itemDetails,
+                'customer_etails' => [
+                    'first_name' => $user->fullname ?? 'guest',
+                    'phone' => $user->phone,
+                ],
+                'payment_type' => 'qris',
+            ];
+
+            // Create Snap transaction
+            try {
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
+                return response()->json([
+                    'status' => 'success',
+                    'snap_token' => $snapToken,
+                    'order_code' => $order->order_code,
+                ], 200);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Gagal membuat transaksi: ' . $e->getMessage(),
+                ], 500);
+            }
+        }
     }
 
     public function checkoutSuccess($orderId)
@@ -238,7 +275,7 @@ class MenuController extends Controller
 
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
-        if($order->patment_method == 'non_tunai') {
+        if ($order->payment_method == 'non_tunai') {
             $order->status = 'settlement';
             $order->save();
         }
