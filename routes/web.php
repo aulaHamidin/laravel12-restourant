@@ -1,6 +1,12 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,3 +24,12 @@ Route::get('/cart/clear', [MenuController::class, 'clearAllCart'])->name('cart.c
 Route::get('/checkout', [MenuController::class, 'checkout'])->name('checkout');
 Route::post('/checkout/store', [MenuController::class, 'storeCheckout'])->name('checkout.store');
 Route::get('/checkout/success/{orderId}', [MenuController::class, 'checkoutSuccess'])->name('checkout.success');
+
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::resource('categories', CategoryController::class); 
+Route::resource('items', ItemController::class);
+Route::resource('orders', OrderController::class);
+Route::resource('users', UserController::class);
+Route::resource('roles', RoleController::class);

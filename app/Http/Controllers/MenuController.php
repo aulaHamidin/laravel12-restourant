@@ -275,7 +275,7 @@ class MenuController extends Controller
 
         $orderItems = OrderItem::where('order_id', $order->id)->get();
 
-        if ($order->payment_method == 'non_tunai') {
+        if ($order->pament_method == 'non_tunai') {
             $order->status = 'settlement';
             $order->save();
         }
