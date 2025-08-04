@@ -184,6 +184,21 @@ class MenuController extends Controller
         ]
     );
 
+        // Cek apakah user dengan nama dan nomor hp sudah ada (role_id = 20/customer)
+        $user = User::where('fullname', $request->input('fullname'))
+            ->where('phone', $request->input('phone'))
+            ->where('role_id', 20)
+            ->first();
+
+        // Jika belum ada, buat user baru
+        if (!$user) {
+            $user = User::create([
+                'fullname' => $request->input('fullname'),
+                'phone' => $request->input('phone'),
+                'role_id' => 20,
+            ]);
+        }
+
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator)
