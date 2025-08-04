@@ -26,25 +26,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill"></i>
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @elseif (session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @elseif (session('not_found'))
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                            <i class="bi bi-info-circle"></i>
-                            {{ session('not_found') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
+                    @include('admin.layouts.alert')
                     <table class="table table-striped" id="table1">
                         <thead>
                             <tr>
@@ -68,7 +50,7 @@
                                             style="width: 50px; height: 50px; object-fit: cover;">
                                     </td>
                                     <td>{{ ucfirst($item->item_name) }}</td>
-                                    <td>{{ Str::limit($item->description, 15) }}</td>
+                                    <td class="{{$item->description == 'Tidak ada deskripsi' ? 'text-danger' : ''}}">{{ Str::limit($item->description, 15) }}</td>
                                     <td>
                                         <i class="bi bi-tags"></i>
                                         @php

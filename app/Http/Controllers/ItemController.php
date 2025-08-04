@@ -65,7 +65,7 @@ class ItemController extends Controller
 
         $item = Item::create([
             'item_name' => $validator['item_name'],
-            'description' => $validator['description'] ?? '-',
+            'description' => $validator['description'] ?? 'Tidak ada deskripsi',
             'price' => $validator['price'],
             'category_id' => $validator['category_id'],
             'image' => $validator['image'] ?? null,
@@ -147,7 +147,7 @@ class ItemController extends Controller
 
         $item->update([
             'item_name' => $validator['item_name'],
-            'description' => $validator['description'] ?? '-',
+            'description' => $validator['description'] ?? 'Tidak ada deskripsi',
             'price' => $validator['price'],
             'category_id' => $validator['category_id'],
             'image' => $validator['image'] ?? $item->image, // Keep old image if no new image is uploaded
