@@ -168,7 +168,21 @@ class MenuController extends Controller
         $validator = Validator::make($request->all(), [
             'fullname' => 'required|string|max:255',
             'phone' => 'required|string|max:15',
-        ]);
+            'table_number' => 'nullable|string|max:10',
+            'payment_method' => 'required|in:tunai,non_tunai',
+        ],
+        [
+            'fullname.required' => 'Nama lengkap harus diisi.',
+            'fullname.max' => 'Nama lengkap tidak boleh lebih dari 255 karakter.',
+            'fullname.string' => 'Nama lengkap harus berupa teks.',
+            'phone.string' => 'Nomor telepon harus berupa teks.',
+            'phone.required' => 'Nomor telepon harus diisi.',
+            'phone.max' => 'Nomor telepon tidak boleh lebih dari 15 karakter.',
+            'table_number.max' => 'Nomor meja tidak boleh lebih dari 10 karakter.',
+            'payment_method.required' => 'Metode pembayaran harus dipilih.',
+            'payment_method.in' => 'Metode pembayaran tidak valid. Pilih antara "tunai" atau "non_tunai".',
+        ]
+    );
 
         if ($validator->fails()) {
             return redirect()->back()

@@ -12,7 +12,7 @@
     <div class="container-fluid py-5">
         <div class="container py-5">
             <h1 class="mb-4">Detail Pembayaran</h1>
-            <form id="checkout-form" action="{{route('checkout.store')}}" method="POST">
+            <form id="checkout-form" action="{{ route('checkout.store') }}" method="POST">
                 @csrf
                 <div class="row g-5">
                     <div class="col-md-12 col-lg-6 col-xl-6">
@@ -20,19 +20,33 @@
                             <div class="col-md-12 col-lg-4">
                                 <div class="form-item w-100">
                                     <label class="form-label my-3">Nama Lengkap</label>
-                                    <input name="fullname" type="text" class="form-control" required placeholder="Masukkan nama anda">
+                                    <input name="fullname" type="text"
+                                        class="form-control @error('fullname') is-invalid @enderror" required
+                                        placeholder="Masukkan nama anda" value="{{ old('fullname') }}">
+                                    @error('fullname')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-12 col-lg-4">
                                 <div class="form-item w-100">
                                     <label class="form-label my-3">Nomor WhatsApp<sup>*</sup></label>
-                                    <input name="phone" type="text" class="form-control" required placeholder="Masukkan no WA">
+                                    <input name="phone" type="text"
+                                        class="form-control @error('phone') is-invalid @enderror" required
+                                        placeholder="Masukkan no WA" value="{{ old('phone') }}">
+                                    @error('phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-12 col-lg-4">
                                 <div class="form-item w-100">
                                     <label class="form-label my-3">Nomor Meja<sup>*</sup></label>
-                                    <input type="text" class="form-control" disabled required value="{{ $tableNumber ?? '-' }}">
+                                    <input type="text" name="table_number" class="form-control @error('table_number') is-invalid @enderror" disabled required
+                                        value="{{ $tableNumber }}">
+                                    @error('table_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -69,20 +83,20 @@
                                                 $total = $item['price'] * $item['quantity'];
                                                 $subtotal += $total;
                                             @endphp
-                                        <tr>
-                                            <th scope="row">
-                                                <div class="d-flex align-items-center mt-2">
-                                                    <img src="https://images.unsplash.com/photo-1591325418441-ff678baf78ef"
-                                                        class="img-fluid rounded-circle"
-                                                        style="width: 100px; height: 90px; object-fit: cover;"
-                                                        alt="">
-                                                </div>
-                                            </th>
-                                            <td class="py-5"> {{$item['name']}} </td>
-                                            <td class="py-5">Rp {{ number_format($item['price'], 2, ',', '.') }}</td>
-                                            <td class="py-5">{{$item['quantity']}}</td>
-                                            <td class="py-5">Rp {{ number_format($total, 2, ',', '.') }}</td>
-                                        </tr>
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="d-flex align-items-center mt-2">
+                                                        <img src="{{ asset('assets/img_item/' . $item['image']) }}"
+                                                            class="img-fluid rounded-circle"
+                                                            style="width: 100px; height: 90px; object-fit: cover;"
+                                                            alt="">
+                                                    </div>
+                                                </th>
+                                                <td class="py-5"> {{ $item['name'] }} </td>
+                                                <td class="py-5">Rp {{ number_format($item['price'], 2, ',', '.') }}</td>
+                                                <td class="py-5">{{ $item['quantity'] }}</td>
+                                                <td class="py-5">Rp {{ number_format($total, 2, ',', '.') }}</td>
+                                            </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -148,7 +162,8 @@
         </div>
     </div>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}">
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -171,42 +186,47 @@
                 } else if (payment_method == 'non_tunai') {
 
                     fetch('{{ route('checkout.store') }}', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                .then(data => {
-                    if(data.snap_token) {
-                        snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
-                                // Handle success
-                                if (data.order_code) {
-                                    window.location.href = '/checkout/success/' + data.order_code;
-                                } else {
-                                    alert('Order code tidak ditemukan. Silakan hubungi admin.');
-                                }
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            onPending: function(result) {
-                                // Handle pending payment
-                                alert('Menunggu proses pembayaran')
-                            },
-                            onError: function(result) {
-                                // Handle error
-                                alert('Terjadi kesalahan saat memproses pembayaran.');
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.snap_token) {
+                                snap.pay(data.snap_token, {
+                                    onSuccess: function(result) {
+                                        // Handle success
+                                        if (data.order_code) {
+                                            window.location.href = '/checkout/success/' +
+                                                data.order_code;
+                                        } else {
+                                            alert(
+                                                'Order code tidak ditemukan. Silakan hubungi admin.'
+                                            );
+                                        }
+                                    },
+                                    onPending: function(result) {
+                                        // Handle pending payment
+                                        alert('Menunggu proses pembayaran')
+                                    },
+                                    onError: function(result) {
+                                        // Handle error
+                                        alert(
+                                            'Terjadi kesalahan saat memproses pembayaran.'
+                                        );
+                                    }
+                                });
+                            } else {
+                                alert('Gagal mendapatkan token pembayaran.');
                             }
-                        });
-                    } else {
-                        alert('Gagal mendapatkan token pembayaran.');
-                    }
-                    
-                })
-                .catch(error => {
-                    alert('Terjadi kesalahan, silahkan coba lagi')
-                })
-            }
+
+                        })
+                        .catch(error => {
+                            alert('Terjadi kesalahan, silahkan coba lagi')
+                        })
+                }
             });
         });
     </script>

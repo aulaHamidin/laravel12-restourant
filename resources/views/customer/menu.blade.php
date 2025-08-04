@@ -22,7 +22,7 @@
                                     <div class="col-md-6 col-lg-6 col-xl-4">
                                         <div class="rounded position-relative fruite-item">
                                             <div class="fruite-img">
-                                                <img src="https://images.unsplash.com/photo-1591325418441-ff678baf78ef"
+                                                <img src="{{ asset('assets/img_item/' . $item->image) }}"
                                                     class="img-fluid w-100 rounded-top" alt="{{ $item->item_name }}"
                                                     onerror="this.onerror=null;this.src='{{ asset('img_item/default.jpg') }}';">
                                             </div>
