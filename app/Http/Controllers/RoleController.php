@@ -22,7 +22,8 @@ class RoleController extends Controller
      */
     public function create()
     {
-        //
+        // Show the form to create a new role
+        return view('admin.role.create');   
     }
 
     /**
@@ -30,7 +31,22 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = $request->validate([
+            'role_name' => 'required|string|max:255|unique:roles,role_name',
+            'description' => 'required|string',
+        ], [
+            'role_name.required' => 'Nama role harus diisi.',
+            'role_name.max' => 'Nama role tidak boleh lebih dari 255 karakter.',
+            'role_name.string' => 'Nama role harus berupa teks.',
+            'role_name.unique' => 'Nama role sudah ada.',
+            'description.required' => 'Deskripsi harus diisi.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+        ]);
+
+        // Create a new role
+        Role::create($validator);
+
+        return redirect()->route('roles.index')->with('success', 'Role berhasil ditambahkan.');
     }
 
     /**
@@ -46,7 +62,8 @@ class RoleController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $role = Role::findOrFail($id); // Assuming Role model exists
+        return view('admin.role.edit', compact('role'));
     }
 
     /**
@@ -54,7 +71,24 @@ class RoleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $role = Role::findOrFail($id);
+
+        $validator = $request->validate([
+            'role_name' => 'required|string|max:255|unique:roles,role_name,' . $role->id,
+            'description' => 'required|string',
+        ], [
+            'role_name.required' => 'Nama role harus diisi.',
+            'role_name.max' => 'Nama role tidak boleh lebih dari 255 karakter.',
+            'role_name.string' => 'Nama role harus berupa teks.',
+            'role_name.unique' => 'Nama role sudah ada.',
+            'description.required' => 'Deskripsi harus diisi.',
+            'description.string' => 'Deskripsi harus berupa teks.',
+        ]);
+
+        // Update the role
+        $role->update($validator);
+
+        return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui.');
     }
 
     /**
@@ -62,6 +96,14 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $role = Role::findOrFail($id);
+
+        if (!$role) {
+            return redirect()->route('roles.index')->with('error', 'Role not found.');
+        }
+
+        $role->delete();
+
+        return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');
     }
 }
