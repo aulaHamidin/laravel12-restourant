@@ -98,10 +98,6 @@ class RoleController extends Controller
     {
         $role = Role::findOrFail($id);
 
-        if (!$role) {
-            return redirect()->route('roles.index')->with('error', 'Role not found.');
-        }
-
         $role->delete();
 
         return redirect()->route('roles.index')->with('success', 'Role deleted successfully.');

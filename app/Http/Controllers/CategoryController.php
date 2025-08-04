@@ -65,10 +65,6 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         $category = Category::findOrFail($id);
-
-        if (!$category) {
-            return redirect()->route('categories.index')->with('error', 'Category not found.');
-        }
         
         return view('admin.category.edit', compact('category'));
     }
@@ -79,10 +75,6 @@ class CategoryController extends Controller
     public function update(Request $request, string $id)
     {
         $category = Category::findOrFail($id);
-
-        if (!$category) {
-            return redirect()->route('categories.index')->with('error', 'Category not found.');
-        }
 
         $validator = $request->validate([
             'cat_name' => 'required|string|max:255|unique:categories,cat_name,' . $id,
@@ -110,14 +102,10 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = category::findOrFail($id);
-
-        if (!$category) {
-            return redirect()->route('categories.index')->with('error', 'category not found.');
-        }
+        $category = Category::findOrFail($id);
 
         $category->delete();
 
-        return redirect()->route('categories.index')->with('success', 'category deleted successfully.');
+        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
     }
 }

@@ -89,11 +89,7 @@ class ItemController extends Controller
     public function edit(string $id)
     {
         $item = Item::findOrFail($id);
-
-        if (!$item) {
-            return redirect()->route('items.index')->with('error', 'Item not found.');
-        }
-
+        
         $categories = Category::orderBy('cat_name', 'asc')->get();
         
         return view('admin.item.edit', compact('item', 'categories'));
@@ -105,10 +101,6 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         $item = Item::findOrFail($id);
-
-        if (!$item) {
-            return redirect()->route('items.index')->with('error', 'Item not found.');
-        }
 
         $validator = $request->validate([
             'item_name' => 'required|string|max:255',
@@ -163,10 +155,6 @@ class ItemController extends Controller
     public function destroy(string $id)
     {
         $item = Item::findOrFail($id);
-
-        if (!$item) {
-            return redirect()->route('items.index')->with('error', 'Item not found.');
-        }
 
         // Hapus gambar jika ada
         if ($item->image && file_exists(public_path('assets/img_item/' . $item->image))) {
