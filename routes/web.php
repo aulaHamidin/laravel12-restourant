@@ -33,3 +33,5 @@ Route::resource('items', ItemController::class);
 Route::resource('orders', OrderController::class);
 Route::resource('users', UserController::class);
 Route::resource('roles', RoleController::class);
+
+Route::patch('items/{id}/update-status', [ItemController::class, 'updateStatus'])->name('items.updateStatus');

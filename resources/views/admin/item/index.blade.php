@@ -75,16 +75,42 @@
                                             <i class="bi bi-pencil"></i>
                                             Edit
                                         </a>
-                                        <form action="{{ route('items.destroy', $item->id) }}" method="POST"
+
+                                        @if ($item->is_active == 1)
+                                        <form action="{{ route('items.updateStatus', $item->id) }}" method="POST"
                                             class="d-inline">
                                             @csrf
-                                            @method('DELETE')
+                                            @method('PATCH')
+                                            <input type="hidden" name="id" value="">
+                                            <input type="hidden" name="is_active" value="0">
                                             <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Apakah Anda yakin ingin mengubah status item ini?')">
+                                                <i class="bi bi-x"></i>
+                                                Nonaktifkan
+                                            </button>
+                                        </form>
+                                        @else ($item->is_active == 0)
+                                        <form action="{{ route('items.updateStatus', $item->id) }}" method="POST"
+                                            class="d-inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="id" value="">
+                                            <input type="hidden" name="is_active" value="1">
+                                            <button type="submit" class="btn btn-success btn-sm"
+                                                onclick="return confirm('Apakah Anda yakin ingin mengubah status item ini?')">
+                                                <i class="bi bi-check"></i>
+                                                Aktifkan
+                                            </button>
+                                        </form>
+                                        @endif
+                                        
+                                           
+                                            {{-- <button type="submit" class="btn btn-danger btn-sm"
                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
                                                 <i class="bi bi-trash"></i>
                                                 Hapus
-                                            </button>
-                                        </form>
+                                            </button> --}}
+                                        
                                     </td>
                                 </tr>
                             @endforeach
