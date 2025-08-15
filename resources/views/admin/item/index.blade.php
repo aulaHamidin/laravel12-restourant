@@ -37,7 +37,7 @@
                                 <th>Kategori</th>
                                 <th>Harga</th>
                                 <th>Status</th>
-                                <th>Aksi</th>
+                                <th colspan="2" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,7 +75,8 @@
                                             <i class="bi bi-pencil"></i>
                                             Edit
                                         </a>
-
+                                    </td>
+                                    <td>
                                         @if ($item->is_active == 1)
                                         <form action="{{ route('items.updateStatus', $item->id) }}" method="POST"
                                             class="d-inline">
@@ -103,14 +104,6 @@
                                             </button>
                                         </form>
                                         @endif
-                                        
-                                           
-                                            {{-- <button type="submit" class="btn btn-danger btn-sm"
-                                                onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
-                                                <i class="bi bi-trash"></i>
-                                                Hapus
-                                            </button> --}}
-                                        
                                     </td>
                                 </tr>
                             @endforeach

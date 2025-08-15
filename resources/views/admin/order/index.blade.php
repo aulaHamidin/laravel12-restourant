@@ -39,7 +39,7 @@
                                 <th>Metode Pembayaran</th>
                                 <td>Catatan</td>
                                 <td>Dibuat Pada</td>
-                                <th>Aksi</th>
+                                <th colspan="2" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,7 +47,8 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
-                                        <span class="badge bg-info">{{ $item->order_code }}</span>
+                                        <span class="badge bg-info"><a href="{{ route('orders.show', $item->id) }}"
+                                                class="text-white">{{ $item->order_code }}</a></span>
                                     </td>
                                     <td>{{ ucfirst($item->user->fullname) }}</td>
                                     <td class="{{ $item->grand_total == 0 ? 'text-danger' : '' }}">
@@ -79,9 +80,32 @@
                                                 <i class="bi bi-eye"></i>
                                                 Lihat
                                             </a>
-                                            {{-- update status pesanan --}}
-                                            
                                         </span>
+                                    </td>
+                                    <td>
+                                        {{-- update status pesanan --}}
+                                        @if (Auth::user()->role->role_name == 'admin' || Auth::user()->role->role_name == 'cashier')
+                                            @if ($item->status == 'pending' && $item->payment_method == 'tunai')
+                                                <form action="{{ route('orders.updateStatus', $item->id) }}"
+                                                    method="POST">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="badge bg-success">
+                                                        <i class="bi bi-check-circle"></i>
+                                                        Terima Pembayaran
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @elseif(Auth::user()->role->role_name == 'chef' && $item->status == 'settlement')
+                                            <form action="{{ route('orders.updateStatus', $item->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="badge bg-success">
+                                                    <i class="bi bi-check-circle"></i>
+                                                    Pesanan Siap
+                                                </button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
