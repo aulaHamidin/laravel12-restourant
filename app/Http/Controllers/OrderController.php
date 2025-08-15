@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -13,8 +14,15 @@ class OrderController extends Controller
     public function index()
     {
         // Logic to retrieve and display orders
-        $orders = Order::with('user')->get();
+        $orders = Order::all()->sortBy('created_at');
         return view('admin.order.index', compact('orders'));
     }
-    
+
+    public function show($id)
+    {
+        $order = Order::findOrFail($id);
+        $orderItems = OrderItem::where('order_id', $id)->get();
+
+        return view('admin.order.show', compact('order', 'orderItems'));
+    }
 }
